@@ -160,6 +160,87 @@ module "vpn_gcp_aws" {
 }
 ```
 
+
+Deploy secure, production-grade VPN interconnect between **AWS, Azure, and GCP** with simple, reusable modules.  
+Automate networking for hybrid/multi-cloud and ensure your workloads communicate securely across all environments!
+
+---
+
+## 📦 CI/CD & Deployment Flow
+
+<p align="center">
+<pre>
+┌───────────┐        ┌──────────┐
+│  Developer│──────▶│   GitHub │
+└───────────┘        └────┬─────┘
+                          │  (push/PR)
+                          ▼
+                ┌──────────────────┐
+                │  Jenkins Pipeline│
+                └──────────────────┘
+                   │      │      │
+      ┌────────────┘      │      └────────────┐
+      ▼                   ▼                   ▼
+┌──────────┐       ┌──────────┐        ┌──────────┐
+│   AWS    │       │   GCP    │        │  Azure   │
+│Terraform │       │Terraform │        │Terraform │
+└──────────┘       └──────────┘        └──────────┘
+</pre>
+</p>
+
+---
+
+## 🛠️ Jenkins Setup Flow
+
+1. **Install Jenkins**  
+   Download and install Jenkins on your server or use a managed Jenkins service.
+
+2. **Install Required Plugins**  
+   - GitHub Integration  
+   - Pipeline  
+   - Terraform  
+   - Credentials Binding
+
+3. **Connect Jenkins to GitHub**  
+   - Add your repository as a Jenkins project (Freestyle or Pipeline).
+   - Configure webhook in GitHub to trigger Jenkins on push/PR.
+
+4. **Configure Credentials**  
+   - Store AWS, Azure, and GCP credentials securely in Jenkins Credentials.
+
+5. **Create Jenkins Pipeline**  
+   Example `Jenkinsfile` steps:
+   ```groovy
+   pipeline {
+     agent any
+     environment {
+       AWS_ACCESS_KEY_ID     = credentials('aws-access-key')
+       AWS_SECRET_ACCESS_KEY = credentials('aws-secret-key')
+       AZURE_CREDENTIALS     = credentials('azure-service-principal')
+       GCP_CREDENTIALS       = credentials('gcp-sa-key')
+     }
+     stages {
+       stage('Checkout') {
+         steps { checkout scm }
+       }
+       stage('Terraform Init') {
+         steps { sh 'terraform init' }
+       }
+       stage('Terraform Plan') {
+         steps { sh 'terraform plan' }
+       }
+       stage('Terraform Apply') {
+         when { branch 'dev' }
+         steps { sh 'terraform apply -auto-approve' }
+       }
+     }
+   }
+   ```
+6. **Run Pipeline**  
+   - On every push/PR to the `dev` branch, Jenkins will run the pipeline and deploy to AWS, Azure, and GCP using Terraform.
+
+---
+
 ---
 
 ## 🛡️ How It Works
